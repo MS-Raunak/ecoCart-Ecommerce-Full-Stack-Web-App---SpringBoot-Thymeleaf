@@ -3,7 +3,8 @@
 	th:fragment="layout(content)">
 <head>
 <meta charset="ISO-8859-1">
-<title>Insert title here</title>
+<link rel="icon" type="image/png" href="../img/appicon.png" /> 
+<title>ecoCart</title>
 <link
 	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
 	rel="stylesheet"
@@ -21,8 +22,10 @@
 	<!-- Start Navbar  -->
 	<nav class="navbar navbar-expand-lg  bg-primary fixed-top navbar-dark">
 		<div class="container-fluid">
-			<a class="navbar-brand" href="#"><i
-				class="fa-solid fa-cart-shopping"></i> Ecom Store</a>
+			<a class="navbar-brand" href="/">
+				<!--  <i class="fa-solid fa-cart-shopping"></i> -->
+				<img alt="" src="../img/appicon.png" width="40px">
+				EcoCart</a>
 			<button class="navbar-toggler" type="button"
 				data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
 				aria-controls="navbarSupportedContent" aria-expanded="false"
@@ -31,34 +34,89 @@
 			</button>
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-					<li class="nav-item"><a class="nav-link active"
-						aria-current="page" href="/"><i class="fa-solid fa-house"></i>
-							Home</a></li>
+					<th:block th:if="${user==null}">
+						<li class="nav-item"><a class="nav-link active"
+							aria-current="page" href="/"><i class="fa-solid fa-house"></i>
+								Home</a></li>
+					</th:block>
+
+					<th:block th:unless="${user==null}">
+						<li class="nav-item" th:if="${user.role=='ROLE_ADMIN'}"><a
+							class="nav-link active" aria-current="page" href="/admin/"><i
+								class="fa-solid fa-house"></i> Home</a></li>
+
+						<li class="nav-item" th:if="${user.role=='ROLE_USER'}"><a
+							class="nav-link active" aria-current="page" href="/"><i
+								class="fa-solid fa-house"></i> Home</a></li>
+					</th:block>
+
+
+
 					<li class="nav-item"><a class="nav-link active"
 						aria-current="page" href="/products">Product</a></li>
 
 					<li class="nav-item dropdown"><a
-						class="nav-link dropdown-toggle" href="#" role="button"
+						class="nav-link dropdown-toggle text-white" href="#" role="button"
 						data-bs-toggle="dropdown" aria-expanded="false"> Category </a>
 						<ul class="dropdown-menu">
-							<li><a class="dropdown-item" href="#">Action</a></li>
-							<li><a class="dropdown-item" href="#">Another action</a></li>
-							<li><hr class="dropdown-divider"></li>
-							<li><a class="dropdown-item" href="#">Something else
-									here</a></li>
+							<li th:each="c:${categorys}"><a class="dropdown-item"
+								th:href="@{'/products?category='+${c.name}}">[[${c.name}]]</a></li>
+
 						</ul></li>
 
 				</ul>
 
 				<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-					<li class="nav-item"><a class="nav-link active"
-						aria-current="page" href="/signin"><i
-							class="fa-solid fa-right-to-bracket"></i> LOGIN</a></li>
-					<li class="nav-item"><a class="nav-link active"
-						aria-current="page" href="/register">REGISTER</a></li>
+					<th:block th:if="${user==null}">
+						<li class="nav-item"><a class="nav-link active"
+							aria-current="page" href="/signin"><i
+								class="fa-solid fa-right-to-bracket"></i> LOGIN</a></li>
+						<li class="nav-item"><a class="nav-link active"
+							aria-current="page" href="/register">REGISTER</a></li>
 
-					<li class="nav-item"><a class="nav-link active"
-						aria-current="page" href="/admin/">ADMIN</a></li>
+
+					</th:block>
+
+					<th:block th:if="${user!=null}">
+						<th:block th:if="${user.role=='ROLE_USER'}">
+							<li class="nav-item"><a class="nav-link active"
+								aria-current="page" href="/user/cart"><i
+									class="fa-solid fa-cart-shopping"></i> Cart [ [[${countCart}]]
+									]</a></li>
+						</th:block>
+						<li class="nav-item dropdown"><a
+							class="nav-link dropdown-toggle active" href="#" role="button"
+							data-bs-toggle="dropdown" aria-expanded="false">
+							 <!-- <i class="fa-solid fa-user"></i>  -->
+							 
+							 <img
+									th:src="@{'../img/profile_img/'+${user.profileImage}}"
+									width="30px" height="30px" class="rounded-circle" >
+									
+							 [[${user.name}]]
+						</a>
+							<ul class="dropdown-menu">
+								<li th:if="${user.role=='ROLE_USER'}"><a
+									class="dropdown-item" href="/user/profile">Profile</a></li>
+
+								<li th:if="${user.role=='ROLE_ADMIN'}"><a
+									class="dropdown-item" href="/admin/profile">Profile</a></li>
+
+								<li th:if="${user.role=='ROLE_USER'}"><a
+									class="dropdown-item" href="/user/user-orders">My Orders</a></li>
+								<li><a class="dropdown-item" href="/logout">Logout</a></li>
+								<li><hr class="dropdown-divider"></li>
+								<li th:if="${user.role=='ROLE_USER'}"><a
+									class="dropdown-item fw-bold" href="/signin">Admin</a></li>
+								<li th:if="${user.role=='ROLE_ADMIN'}"><a
+									class="dropdown-item fw-bold" href="/signin">Customer</a></li>
+
+							</ul></li>
+
+						<!-- <li class="nav-item"><a class="nav-link active"
+							aria-current="page" href="/logout"><i
+								class="fa-solid fa-right-to-bracket"></i> Logout</a></li> -->
+					</th:block>
 
 				</ul>
 
@@ -70,10 +128,87 @@
 	<div th:replace="${content}"></div>
 
 	<!-- Start Footer -->
-	<div class="container-fluid p-1 bg-primary text-center text-white">
-		<p>ecom.com</p>
-	</div>
+	<footer class="bg-dark text-white mt-5">
+		<div class="container py-5">
+			<div class="row">
+
+				<!-- Company Information -->
+				<div class="col-md-3">
+					<h5>About Us</h5>
+					<p>We are a leading e-commerce platform providing a wide range
+						of products at the best prices.</p>
+					<p>&copy; Eco Cart India Pvt. Ltd.</p>
+				</div>
+
+				<!-- Quick Links -->
+				<div class="col-md-3">
+					<h5>Quick Links</h5>
+					<ul class="list-unstyled">
+						<li><a href="#" class="text-white">About Us</a></li>
+						<li><a href="#" class="text-white">Contact Us</a></li>
+						<li><a href="#" class="text-white">FAQ</a></li>
+						<li><a href="#" class="text-white">Privacy Policy</a></li>
+					</ul>
+				</div>
+
+				<!-- Customer Service -->
+				<div class="col-md-3">
+					<h5>Customer Service</h5>
+					<ul class="list-unstyled">
+						<li><a href="#" class="text-white">Shipping Policy</a></li>
+						<li><a href="#" class="text-white">Return Policy</a></li>
+						<li><a href="#" class="text-white">Track Order</a></li>
+						<li><a href="#" class="text-white">Support</a></li>
+					</ul>
+				</div>
+
+				<!-- Contact Information -->
+				<div class="col-md-3">
+					<h5>Contact Us</h5>
+					<p>
+						<i class="bi bi-geo-alt-fill"></i> 1234 Market Street, City,
+						Country
+					</p>
+					<p>
+						<i class="bi bi-telephone-fill"></i> +1 (234) 567-890
+					</p>
+					<p>
+						<i class="bi bi-envelope-fill"></i> info@ecocartind.com
+					</p>
+
+					<!-- Social Media Links -->
+					<h5>Follow Us</h5>
+					<a href="#" class="text-white me-2"><i class="bi bi-facebook"></i></a>
+					<a href="#" class="text-white me-2"><i class="bi bi-twitter"></i></a>
+					<a href="#" class="text-white me-2"><i class="bi bi-instagram"></i></a>
+					<a href="#" class="text-white"><i class="bi bi-linkedin"></i></a>
+				</div>
+			</div>
+		</div>
+
+		<!-- Footer Bottom -->
+		<div class="bg-secondary text-center py-3">
+			<p class="mb-0">© EcoCart. All Rights Reserved.</p>
+		</div>
+	</footer>
+	<!-- Footer End -->
+
+	<!-- Bootstrap Icons -->
+	<link rel="stylesheet"
+		href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
 	<!-- End Footer  -->
+
+	<!-- Jquery Validation Library  -->
+	<script
+		src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
+	<script type="text/javascript" src="js/script.js"></script>
+	<script type="text/javascript" src="../js/script.js"></script>
+	<!--Jquery Validation Library End  -->
+
+	<!-- Bootstrap JS CDN-->
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
 		integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
